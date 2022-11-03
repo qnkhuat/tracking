@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import traceback
 
-from database import DB
+import database
 #from src.logger import logger
 
 # the collection name of task_history table
@@ -16,28 +16,32 @@ def diff_time_in_microseconds(time1, time2):
   # apply an abs to ensure the different is always positive
   return abs((time1 - time2).total_seconds() * 1000)
 
-def create_task_history(task_name, task_details):
+def create_task_history(task_name):
   task_info = {
       "name": task_name,
       "start_time": datetime.now(),
       "end_time": None,
       "duration": None,
       "status": "started",
-      "details": json.dumps(task_details),
-      "summary": None,
       "error": None
       }
+  with database.connection() as conn:
+    cursor = conn.cursor()
+    cursor.execute(*database.insert_sql("task_history", task_info)).fetchone()
+    task_info['id'] = cursor.lastrowid
+
+  assert task_info['id'], "should have task_id"
   return task_info
 
-def on_task_done(task_history, summary):
+def on_task_done(task_history):
   now = datetime.now()
   update_task_history = {
-      "summary": json.dumps(summary),
       "status": "done",
       "end_time": now,
-      "duration": diff_time_in_microseconds(now, task_history.start_time)
+      "duration": diff_time_in_microseconds(now, task_history['start_time'])
       }
-  print("TASK DONE", update_task_history)
+  with database.connection() as conn:
+    conn.execute(*database.update_sql("task_history", update_task_history, f"id = {task_history['id']}"))
 
 def on_task_error(task_history, error):
   now = datetime.now()
@@ -45,28 +49,33 @@ def on_task_error(task_history, error):
       "error": str(error),
       "status": "error",
       "end_time": now,
-      "duration": diff_time_in_microseconds(now, task_history.start_time)
+      "duration": diff_time_in_microseconds(now, task_history['start_time'])
       }
-  print("TASK ERROR", update_task_history)
+  with database.connection() as conn:
+    conn.execute(*database.update_sql("task_history", update_task_history, f"id = {task_history['id']}"))
 
 def runner(task_name):
   def decorator(func):
     def wrapper(*args, **kwargs):
-      task_details = kwargs.get("task_details", {})
-      task_history = create_task_history(task_name, task_details)
-      print(f"Task started {task_name} {task_history.id}")
+      task_history = create_task_history(task_name)
+      task_id = task_history['id']
+      print(f"Task started {task_name} {task_id}")
       result = None
       try:
         # populate task_id to the task function
-        kwargs["task_id"] = task_history.id
+        kwargs["task_id"] = task_id
         result = func(*args, **kwargs)
       except Exception as e:
-        print(f"Task error {task_name} {task_history.id} with error: {e}")
+        print(f"Task error {task_name} {task_id} with error: {e}")
         print(traceback.format_exc())
         on_task_error(task_history, e)
       else:
-        print(f"Task done {task_name} {task_history.id}: {result}")
-        on_task_done(task_history, result)
+        print(f"Task done {task_name} {task_id}: {result}")
+        on_task_done(task_history)
       return result
     return wrapper
   return decorator
+
+@runner("Just a task")
+def doit(**kwargs):
+  print("DOIT?")

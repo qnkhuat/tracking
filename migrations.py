@@ -32,16 +32,33 @@ def run_migrations(migrations):
 
 create_data_table = {
     "name": "create_data_table",
-    "sql": """
+    "sql" : """
     CREATE TABLE data (
+    id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
+    type TEXT,
     value REAL,
+    settings TEXT,
     timestamp datetime NOT NULL,
     created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP)
     """}
 
+create_task_history_table = {
+    "name": "create_task_history_table",
+    "sql" : """
+    CREATE TABLE task_history (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    start_time datetime NOT NULL,
+    end_time datetime,
+    duration INTEGER,
+    status TEXT NOT NULL,
+    error TEXT);
+    """}
+
 migrations = [
     create_data_table,
+    create_task_history_table,
     ]
 
 if __name__ == "__main__":
