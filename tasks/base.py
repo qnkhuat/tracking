@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 import traceback
 
@@ -75,7 +74,3 @@ def runner(task_name):
       return result
     return wrapper
   return decorator
-
-@runner("Just a task")
-def doit(**kwargs):
-  print("DOIT?")

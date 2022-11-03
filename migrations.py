@@ -12,7 +12,8 @@ def create_migration_table_if_needed():
 def save_migration_sql(name):
   return ["INSERT INTO migration values (?);", [name]]
 
-def run_migrations(migrations):
+def _run_migrations(migrations):
+  print("Start migration")
   create_migration_table_if_needed()
 
   for migration in migrations:
@@ -27,6 +28,8 @@ def run_migrations(migrations):
                               [migration_name]).fetchall()
     else:
       print(f"Skip migration {migration_name}")
+
+  print("Migrated successfully!")
 
 ## ------------------------------------- Migrations definition ------------------------------------- ##
 
@@ -61,5 +64,8 @@ migrations = [
     create_task_history_table,
     ]
 
+# run migrations by default
+run_migrations = lambda : _run_migrations(migrations)
+
 if __name__ == "__main__":
-  run_migrations(migrations)
+  run_migrations()

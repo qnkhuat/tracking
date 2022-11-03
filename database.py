@@ -61,4 +61,3 @@ def connection():
     raise e
   else:
     DB.commit()
-
