@@ -1,4 +1,4 @@
-from database import connection, DB
+from tracking.database import connection, DB
 
 def create_migration_table_if_needed():
   sql = """
@@ -39,8 +39,8 @@ create_data_table = {
     CREATE TABLE data (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
-    type TEXT,
-    value REAL,
+    type TEXT NOT NULL,
+    value REAL NOT NULL,
     settings TEXT,
     timestamp datetime NOT NULL,
     created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP)

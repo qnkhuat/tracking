@@ -1,8 +1,7 @@
 from datetime import datetime
 import traceback
 
-import database
-#from src.logger import logger
+from tracking import database
 
 # the collection name of task_history table
 TASK_HISTORY = 'task_history'
