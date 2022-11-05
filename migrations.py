@@ -41,6 +41,7 @@ create_data_table = {
     name TEXT NOT NULL,
     type TEXT NOT NULL,
     value REAL NOT NULL,
+    source TEXT NOT NULL,
     settings TEXT,
     timestamp datetime NOT NULL,
     created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP)
@@ -56,6 +57,7 @@ create_task_history_table = {
     end_time datetime,
     duration INTEGER,
     status TEXT NOT NULL,
+    summary TEXT,
     error TEXT);
     """}
 

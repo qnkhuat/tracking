@@ -10,8 +10,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from tracking.tasks.base import runner
 from tracking import database as db
 
-@runner("daily_sjc_gold")
-def daily_sjc_gold(**kwargs):
+TASK_NAME="daily_sjc_gold"
+
+@runner(TASK_NAME)
+def run(**kwargs):
   url = "https://sjc.com.vn/giavang/"
 
   chrome_options = Options()
@@ -27,17 +29,21 @@ def daily_sjc_gold(**kwargs):
 
   with db.connection() as conn:
     buy_price = int(buy_price_el.text.replace(",", ""))
+    settings = json.dumps({"currency": "VND", "unit": "1luong"})
+    timestamp = datetime.now()
     data = {"name": "sjc_gold_buy",
             "value": buy_price,
             "type": "gold",
-            "settings": json.dumps({"currency": "VND", "unit": "1luong"}),
-            "timestamp": datetime.now()}
+            "source": "www.sjc.com.vn/giavang/",
+            "settings": settings,
+            "timestamp": timestamp}
     conn.execute(*db.insert_sql("data", data))
 
     sell_price = int(sell_price_el.text.replace(",", ""))
     data = {"name": "sjc_gold_sell",
             "value": sell_price,
             "type": "gold",
-            "settings": json.dumps({"currency": "VND"}),
-            "timestamp": datetime.now()}
+            "source": "www.sjc.com.vn/giavang/",
+            "settings": settings,
+            "timestamp": timestamp}
     conn.execute(*db.insert_sql("data", data))

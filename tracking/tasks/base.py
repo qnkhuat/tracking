@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 import traceback
 
 from tracking import database
@@ -31,9 +32,10 @@ def create_task_history(task_name):
   assert task_info['id'], "should have task_id"
   return task_info
 
-def on_task_done(task_history):
+def on_task_done(task_history, summary):
   now = datetime.now()
   update_task_history = {
+      "summary":  json.dumps(summary) if summary else None,
       "status": "done",
       "end_time": now,
       "duration": diff_time_in_microseconds(now, task_history['start_time'])
@@ -69,7 +71,7 @@ def runner(task_name):
         on_task_error(task_history, e)
       else:
         print(f"Task done {task_name} {task_id}: {result}")
-        on_task_done(task_history)
+        on_task_done(task_history, result)
       return result
     return wrapper
   return decorator
