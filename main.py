@@ -16,7 +16,6 @@ def run_one_time_tasks():
   else:
     print(f"SKIP {historical_sjc_gold.TASK_NAME}")
 
-
 def main ():
   run_migrations()
   run_one_time_tasks()
